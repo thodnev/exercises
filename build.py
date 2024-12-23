@@ -3,6 +3,7 @@
 """Applies changes from the changeset and builds project."""
 
 import argparse
+from dataclasses import dataclass
 import logging
 import pathlib as pth
 import re
@@ -19,9 +20,48 @@ DEFS = {
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('BUILD' if __name__ == '__main__' else __name__)
 
-class Build:
-    CHANGESET_PAT = re.compile(r'\d+_.*?[.]py')
+@dataclass
+class Change:
+    priority: int
+    name: str
+    file: pth.Path
 
+    FNAME_RE = re.compile(r'(\d+)_(.*?)[.]py')
+
+    @classmethod
+    def path_match(cls, filepath: pth.Path | str):
+        filepath = pth.Path(filepath)
+
+        return (filepath.suffix.lower() == '.py'
+                and filepath.exists()
+                and cls.FNAME_RE.fullmatch(filepath.name))
+
+    def __init__(self, filepath: pth.Path | str, dir: pth.Path | str | None = None):
+        if dir is not None:
+            dir = pth.Path(dir)
+            filepath = dir.joinpath(filepath)
+        else:
+            filepath = pth.Path(filepath)
+        
+        match = self.path_match(filepath)
+        assert match, 'Wrong file path'
+        
+        priority, name = match.groups()
+
+        tmp = '\0TEMP\0'
+        name = name.replace('__', tmp)
+        name = name.replace('_', ' ')
+        name = name.replace(tmp, '_')
+
+        self.name = name.capitalize()
+        self.priority = int(priority)
+        self.file = filepath
+
+
+    def apply(self, env):
+        ...
+
+class Build:
     # Buildvars defaults
     build_dir = 'build'
     changeset_dir = 'changeset'
@@ -55,7 +95,7 @@ class Build:
         return res
 
     def _changeset_collect(self):
-        pat = self.CHANGESET_PAT
+        pat = Change.FNAME_RE
         cdir = pth.Path(self.changeset_dir)
 
         chgs = [name.relative_to(cdir) for name in cdir.glob('*.py')]
