@@ -3,6 +3,7 @@
 
 import argparse
 from dataclasses import dataclass
+from getpass import getuser
 import logging
 import pathlib as pth
 import re
@@ -13,10 +14,10 @@ import tempfile
 import types
 import typing as t
 
-DEFS = {
+DEFS = types.SimpleNamespace(**{
     'build_dir': 'build',
     'changeset_dir': 'changeset',
-}
+})
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('BUILD' if __name__ == '__main__' else __name__)
@@ -84,17 +85,21 @@ class BuildError(Exception):
 
 
 class Build:
-    # Buildvars defaults
-    builddir = 'build'
-    changesetdir = 'changeset'
-    # changeset: list
-    # tmpdir: ...
     log = logger
+    # Buildvars defaults
+    builddir: pth.Path | str = 'build'
+    changesetdir: pth.Path | str = 'changeset'
+    auto_tmpdir: bool = True
+
+    builddir_orig: t.Optional[pth.Path]
+    changeset: list[Change]
+    change_queue: t.Optional[list[Change]]
+    tmpdir: t.Optional[tempfile.TemporaryDirectory] = None
+    
 
     def __init__(self, **buildvars):
-        for k, v in buildvars.items():
-            setattr(self, k, v)
         self.changeset = []
+        self.config_vars(**buildvars)  
 
     def tmpdir_mount(self, move_files: bool = True):
         tmp = getattr(self, 'tmpdir', None)
@@ -107,7 +112,7 @@ class Build:
                                              pth.Path(self.builddir)]
 
         if move_files and not is_empty_dir(self.builddir_orig):
-            self.log.info(f'Moving files from builddir "{self.builddir_orig}"' +
+            self.log.info(f'Copying files from builddir "{self.builddir_orig}"' +
                           f' to tmpdir "{self.builddir}"')
             # NOTE: Python bug - without dirs_exitst_ok it tries
             #       to recreate the dst dir itself
@@ -131,11 +136,51 @@ class Build:
             shutil.copytree(src=curdir, dst=self.builddir, dirs_exist_ok=True)
 
         tmp.cleanup()
+        self.tmpdir = None
         self.log.info(f'Unmounted tmpdir "{curdir}"')
 
-    def changeset_load(self, changeset_dir=None):
-        ...
+    def changeset_add_dir(self, dir: pth.Path | str):
+        chgs = Change.collect_dir(dir)
+        chgs = sorted(chgs, key=lambda c: [c.priority, c.id])
+        self.changeset.extend(chgs)
+    
+    def build(self):
+        changes = list(self.changeset)
+        if not changes:
+            raise BuildError('Changeset is empty, nothing to build')
+        
+        self.log.info(f"Let's cook some stuff, {getuser()}...")
+        if self.auto_tmpdir:
+            self.tmpdir_mount()
 
+        self.change_queue = changes
+        i = 0
+        while self.change_queue:
+            ntotal = len(self.change_queue)
+            decim = len(str(ntotal))
+
+            i += 1
+            chg = self.change_queue.pop(0)
+
+            msg = fr'[{i:>{decim}}\{ntotal}] Applying #{chg.priority} {chg.name}...'
+            self.log.info(msg)
+
+            chg.apply(env=self)
+        
+        if self.tmpdir:
+            self.tmpdir_umount()
+
+        self.log.info(f'[ALL DONE]')
+
+    def config_vars(self, **buildvars):
+        for k, v in buildvars.items():
+            setattr(self, k, v)
+
+        # ensure dirs are set as Path
+        for k in 'builddir', 'changesetdir':
+            v = getattr(self, k)
+            setattr(self, k, pth.Path(v)) 
+    
     def parse_args(self, argv=sys.argv):
         progname, *args = argv
         parser = argparse.ArgumentParser(prog=progname,
@@ -157,41 +202,11 @@ class Build:
         res = parser.parse_args()
         return res
 
-    def _changeset_collect(self):
-        pat = Change.FNAME_RE
-        cdir = pth.Path(self.changesetdir)
-
-        chgs = [name.relative_to(cdir) for name in cdir.glob('*.py')]
-        chgs = [name for name in chgs if pat.fullmatch(str(name))]
-        chgs = [name.stem for name in chgs]
-
-        chgs.sort()
-        #res = {int(el.split('_')[0]): el for el in chgs}
-        return chgs
-
-    def apply_change(self, change_entry):
-        cdir = pth.Path(self.changesetdir)
-        file = cdir.joinpath(f'{change_entry}.py')
-
-        globs = runpy.run_path(file, run_name=change_entry)
-        build = globs['build']
-        res = build(self)
-        return res
-
-
-def clean(build_dir: pth.Path):
-    ...
-
-
-def build(build_dir: pth.Path, changeset_dir: pth.Path, *, env):
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        tmp_dir = pth.Path(tmp_dir)
-        env.out_dir = ...
-    build_dir = pth.Path(build_dir)
-    build_dir.mkdir(exist_ok=False)  # must not exist before
+    def clean(build_dir: pth.Path):
+        ...
 
 
 if __name__ == '__main__':
     bld = Build()
-    chgs = bld._changeset_collect()
-    bld.changeset.extend(chgs)
+    bld.changeset_add_dir(bld.changesetdir)
+    bld.build()

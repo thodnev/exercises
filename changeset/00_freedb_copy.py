@@ -2,3 +2,4 @@
 
 def build(env):
     print(f'{__name__} got env "{env}"')
+    env.log.info(f'Test some logging from {__name__}')
