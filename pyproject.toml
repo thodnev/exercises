@@ -1,6 +1,10 @@
 [tool.basedpyright]
 typeCheckingMode = "standard"       # standard Python3, with everything else set to optional
 
+[tool.yapf]
+based_on_style = "pep8"
+column_limit = 99
+
 [tool.poetry]
 name = "exercises"
 version = "0.1.0-alpha.1"
