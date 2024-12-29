@@ -1,0 +1,9 @@
+# This file contains vars used to configure the build system (build.py)
+# Some values may be omitted, in this case the defaults are used
+
+#build_dir: build
+#changeset_dir: changeset
+
+# Path to Free-Exercise-DB Git submodule
+# specified relative to build.py directory
+freedb_dir: deps/free-exercise-db

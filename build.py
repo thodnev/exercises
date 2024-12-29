@@ -14,10 +14,16 @@ import tempfile
 import types
 import typing as t
 
+from ruamel.yaml import YAML as _YAML
+yaml=_YAML(typ='safe')
+
 DEFS = types.SimpleNamespace(**{
+    'build_config': 'build_config.yml',
     'build_dir': 'build',
     'changeset_dir': 'changeset',
 })
+
+SCRIPT_DIR = pth.Path(__file__).parent
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('BUILD' if __name__ == '__main__' else __name__)
@@ -87,8 +93,9 @@ class BuildError(Exception):
 class Build:
     log = logger
     # Buildvars defaults
-    builddir: pth.Path | str = 'build'
-    changesetdir: pth.Path | str = 'changeset'
+    build_config: pth.Path | str = DEFS.build_config
+    builddir: pth.Path | str = DEFS.build_dir
+    changesetdir: pth.Path | str = DEFS.changeset_dir
     auto_tmpdir: bool = True
 
     builddir_orig: t.Optional[pth.Path]
@@ -99,7 +106,7 @@ class Build:
 
     def __init__(self, **buildvars):
         self.changeset = []
-        self.config_vars(**buildvars)  
+        self.configure_vars(**buildvars)  
 
     def tmpdir_mount(self, move_files: bool = True):
         tmp = getattr(self, 'tmpdir', None)
@@ -172,7 +179,30 @@ class Build:
 
         self.log.info(f'[ALL DONE]')
 
-    def config_vars(self, **buildvars):
+    def configure(self, **buildvars):
+        """Use available sources to configure build.
+
+        Sources are tested in particular order and priority (higher to lower):
+        - buildvars passed as kwargs
+        - command-line arguments
+        - YML config file
+        - instance & class defaults
+        """
+        #cfg = self.parse_args()
+        build_config = buildvars.get('build_config', self.build_config)
+        
+        try:
+            self.configure_yaml(build_config)
+        except FileNotFoundError:
+            pass
+
+        self.configure_vars(**buildvars)
+
+        # Assuming everything is set to correctly call it
+        if not self.changeset:
+            self.changeset_add_dir(self.changesetdir)
+
+    def configure_vars(self, **buildvars):
         for k, v in buildvars.items():
             setattr(self, k, v)
 
@@ -180,8 +210,22 @@ class Build:
         for k in 'builddir', 'changesetdir':
             v = getattr(self, k)
             setattr(self, k, pth.Path(v)) 
-    
+
+    def configure_yaml(self, configfile: t.Optional[pth.Path | str] = None):
+        configfile = configfile if configfile is not None else self.build_config
+        configfile = pth.Path(configfile).relative_to(SCRIPT_DIR)
+
+        try:
+            cfg = yaml.load(configfile)
+            self.log.debug(f'Loaded config {configfile}:\n{cfg}')
+            self.configure_vars(**cfg)
+        except FileNotFoundError as exc:
+            raise exc
+        except Exception:
+            raise BuildError(f'Config file "{configfile}" is not valid YML config')
+
     def parse_args(self, argv=sys.argv):
+        # TODO: implement this
         progname, *args = argv
         parser = argparse.ArgumentParser(prog=progname,
                                          description=__doc__,
@@ -207,6 +251,7 @@ class Build:
 
 
 if __name__ == '__main__':
+    #logger.setLevel(logging.DEBUG)
     bld = Build()
-    bld.changeset_add_dir(bld.changesetdir)
+    bld.configure()
     bld.build()
