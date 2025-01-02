@@ -4,6 +4,12 @@
 #build_dir: build
 #changeset_dir: changeset
 
+# directory where exercises are packed
+exc_dir: exercises
+
 # Path to Free-Exercise-DB Git submodule
 # specified relative to build.py directory
 freedb_dir: deps/free-exercise-db
+
+# how each freedb data file will be named
+freedb_exc_json: data.json

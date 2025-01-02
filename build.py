@@ -160,19 +160,22 @@ class Build:
         if self.auto_tmpdir:
             self.tmpdir_mount()
 
+        sublog = logging.getLogger('...')
+        sublog.parent = self.log
+
         self.change_queue = changes
         i = 0
+        ntotal = len(self.change_queue)
+        decim = len(str(ntotal))
         while self.change_queue:
-            ntotal = len(self.change_queue)
-            decim = len(str(ntotal))
-
             i += 1
             chg = self.change_queue.pop(0)
 
             msg = fr'[{i:>{decim}}\{ntotal}] Applying #{chg.priority} {chg.name}...'
             self.log.info(msg)
 
-            chg.apply(env=self)
+            sublog.name = chg.name
+            chg.apply(env=self, log=sublog)
         
         if self.tmpdir:
             self.tmpdir_umount()
@@ -213,7 +216,8 @@ class Build:
 
     def configure_yaml(self, configfile: t.Optional[pth.Path | str] = None):
         configfile = configfile if configfile is not None else self.build_config
-        configfile = pth.Path(configfile).relative_to(SCRIPT_DIR)
+        configfile = pth.Path(configfile)
+        # configfile = configfile.relative_to(SCRIPT_DIR)
 
         try:
             cfg = yaml.load(configfile)
@@ -251,7 +255,7 @@ class Build:
 
 
 if __name__ == '__main__':
-    #logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
     bld = Build()
     bld.configure()
     bld.build()
