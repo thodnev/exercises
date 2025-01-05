@@ -5,6 +5,10 @@ typeCheckingMode = "standard"       # standard Python3, with everything else set
 based_on_style = "pep8"
 column_limit = 99
 
+[tool.black]
+line-length = 99
+skip-string-normalization = true
+
 [tool.poetry]
 name = "exercises"
 version = "0.1.0-alpha.1"
