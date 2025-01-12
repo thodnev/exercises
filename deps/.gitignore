@@ -1,0 +1,6 @@
+# Raw dataset from [SL] website
+# We use it for stats crunching, but storing the original
+# dataset in repo wouldn't be much ethical
+# If you need it, run the script to get it yourself
+# See sl_grab.py for details
+/sl_raw_dataset.yml
