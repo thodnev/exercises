@@ -118,6 +118,7 @@ class Build:
         self.builddir, self.builddir_orig = [pth.Path(self.tmpdir.name),
                                              pth.Path(self.builddir)]
 
+        self.builddir_orig.mkdir(exist_ok=True)
         if move_files and not is_empty_dir(self.builddir_orig):
             self.log.info(f'Copying files from builddir "{self.builddir_orig}"' +
                           f' to tmpdir "{self.builddir}"')

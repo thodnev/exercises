@@ -3,8 +3,7 @@
 import pathlib as pth
 import shutil
 
-
-FREEDB_EXCDIR_NAME = 'exercises'        # freedb directory where exercises are located
+FREEDB_EXCDIR_NAME = 'exercises'  # freedb directory where exercises are located
 
 
 def build(env, log):
@@ -13,7 +12,7 @@ def build(env, log):
     except FileExistsError:
         log.warning(f'SKIPPING\t- Exercise dir {env.exc_dir} exists')
         return
-    
+
     freedb_exc = env.freedb_dir.joinpath(FREEDB_EXCDIR_NAME)
     _, dirs, files = next(freedb_exc.walk())
     #dirs = [exdir.joinpath(d) for d in dirs]
@@ -35,20 +34,23 @@ def build(env, log):
             log.warning(f'No dir found for {file}')
             dir = None
         entries[file] = dir
-    
+
     for dir in _dirset:
         log.warning(f'No JSON for dir {freedb_exc.joinpath(dir)}')
 
     log.info(f'Packing freedb exercises into "{env.exc_dir}"')
     for file, dir in entries.items():
-        dst = env.exc_dir.joinpath(dir.name)
-        log.debug('\tcopy {dir.name}')
+        excdst = env.exc_dir.joinpath(dir.name)
+
+        log.debug(f'\tcopy {dir.name}')
+        imgdst = excdst.joinpath(env.img_subdir)
+        # original dir stores imgs and should become imgdir
 
         if dir is None:
-            dst.mkdir()
+            excdst.mkdir()
+            imgdst.mkdir()
         else:
-            shutil.copytree(dir, dst)
-        
-        shutil.copy2(file, dst.joinpath(env.freedb_exc_json))
-        
-        
+            shutil.copytree(dir, imgdst)
+
+        # now the json itself
+        shutil.copy2(file, excdst.joinpath(env.freedb_exc_json))

@@ -7,6 +7,9 @@
 # directory where exercises are packed
 exc_dir: exercises
 
+# subdir inside `exc_dir` where howto images are put
+img_subdir: img
+
 # Path to Free-Exercise-DB Git submodule
 # specified relative to build.py directory
 freedb_dir: deps/free-exercise-db

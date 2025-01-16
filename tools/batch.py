@@ -21,6 +21,7 @@ class CommandBatch:
         'optlong': ['--{opt}', '{optkey}={optvalue}'],
     }
 
+    # TODO: get rid of 'type' to allow running under PyPy (+3% speedup = naive)
     type ArgFmt = Mapping[str, str | list[str]] | Callable[[str, Optional[str]], Iterable[str]]
     type AnyItem = Any
 
