@@ -2,6 +2,9 @@
 
 # We're trying to keep Git diffs small and always use the latest packages
 poetry.lock
+# This is user-specific and may contain sensitive information
+# per https://python-poetry.org/docs/configuration/
+/poetry.toml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,0 +1,86 @@
+# initial_id: { ... exercise data to patch ...}
+bent_over_dumbbell_rear_delt_raise_with_head_on_bench:
+  id: head_supported_rear_delt_raise
+
+decline_close_grip_bench_to_skull_crusher:
+  # TODO: add more img
+  id: decline_bench_to_skull_crusher
+
+dumbbell_lying_one_arm_rear_lateral_raise:
+  id: dumbbell_lying_1arm_rear_lat_raise
+
+extended_range_one_arm_kettlebell_floor_press:
+  id: extended_1arm_kettlebell_floor_press
+
+hyperextensions_with_no_hyperextension_bench:
+  # TODO: rename json
+  id: flat_bench_hyperextension
+
+incline_dumbbell_bench_with_palms_facing_in:
+  id: incline_dumbbell_palm_in_bench
+
+kneeling_cable_crunch_with_alternating_oblique_twists:
+  id: kneeling_cable_crunch_with_obliques
+
+lying_close_grip_barbell_triceps_extension_behind_the_head:
+  id: ''
+
+lying_close_grip_barbell_triceps_press_to_chin:
+  id: ''
+
+one_arm_kettlebell_military_press_to_the_side:
+  id: ''
+
+one_arm_pronated_dumbbell_triceps_extension:
+  id: ''
+
+one_arm_supinated_dumbbell_triceps_extension:
+  id: ''
+
+palms_down_dumbbell_wrist_curl_over_a_bench:
+  id: ''
+
+palms_up_dumbbell_wrist_curl_over_a_bench:
+  id: ''
+
+seated_bent_over_one_arm_dumbbell_triceps_extension:
+  id: ''
+
+seated_bent_over_two_arm_dumbbell_triceps_extension:
+  id: ''
+
+seated_close_grip_concentration_barbell_curl:
+  id: ''
+
+seated_one_arm_dumbbell_palms_down_wrist_curl:
+  id: ''
+
+seated_one_arm_dumbbell_palms_up_wrist_curl:
+  id: ''
+
+seated_two_arm_palms_up_low_pulley_wrist_curl:
+  id: ''
+
+standing_bent_over_one_arm_dumbbell_triceps_extension:
+  id: ''
+
+standing_bent_over_two_arm_dumbbell_triceps_extension:
+  id: ''
+
+standing_dumbbell_straight_arm_front_delt_raise_above_head:
+  id: ''
+
+standing_low_pulley_one_arm_triceps_extension:
+  id: ''
+
+standing_one_arm_dumbbell_curl_over_incline_bench:
+  id: ''
+
+standing_one_arm_dumbbell_triceps_extension:
+  id: ''
+
+standing_overhead_barbell_triceps_extension:
+  id: ''
+
+standing_palms_up_barbell_behind_the_back_wrist_curl:
+  id: ''

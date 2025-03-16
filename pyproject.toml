@@ -1,20 +1,10 @@
-[tool.basedpyright]
-typeCheckingMode = "standard"       # standard Python3, with everything else set to optional
-
-[tool.yapf]
-based_on_style = "pep8"
-column_limit = 99
-
-[tool.black]
-line-length = 99
-skip-string-normalization = true
-
 [tool.poetry]
 name = "exercises"
 version = "0.1.0-alpha.1"
 description = "StrongerFox exercise db"
 authors = ["thodnev <thodnev@gmail.com>"]
 readme = "README.md"
+# package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -25,6 +15,17 @@ datamodel-code-generator = "^0.26.4"
 
 [tool.poetry.group.dev.dependencies]
 commitizen = "^4.1.0"
+
+[tool.yapf]
+based_on_style = "pep8"
+column_limit = 99
+
+[tool.black]
+line-length = 99
+skip-string-normalization = true
+
+#[tool.basedpyright]
+#typeCheckingMode = "standard"       # standard Python3, with everything else set to optional
 
 [build-system]
 requires = ["poetry-core"]
