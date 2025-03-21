@@ -14,5 +14,26 @@ img_subdir: img
 # specified relative to build.py directory
 freedb_dir: deps/free-exercise-db
 
-# how each freedb data file will be named
+# how each freedb data file will be named in excercise dirs
 freedb_exc_json: data.json
+
+# Model generation logic
+freedb_model:
+  # Relative path (from freedb_dir) to JSON schema
+  # Used to generate models
+  schema_file: "{env.freedb_dir}/schema.json"
+
+  # Path to generated model, relative to project dir
+  model_file: models/freedb/base.py
+
+  # Whether to update model checked-at field at build
+  # for details see tools/genmodel.py
+  renew_checked_at: false  # false reduces num of git changes
+
+  # Extra keyword arguments passed to datamodel_codegen
+  codegen_extras:
+    output_model_type: 'pydantic_v2.BaseModel'
+
+
+
+
