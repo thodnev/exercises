@@ -10,7 +10,7 @@ import itertools
 import pathlib as pth
 import re
 import tempfile
-from typing import Iterable
+from typing import Iterable, get_type_hints
 
 type AnyPath = pth.Path | str
 
@@ -28,16 +28,25 @@ def get_model_raw(schema_file: AnyPath, **kwargs) -> str:
         model code as string
     """
     tmp = tempfile.NamedTemporaryFile(prefix='tmp_codegen_')
+    opts = dict(
+        input_file_type=InputFileType.JsonSchema,
+        output_model_type=DataModelType.DataclassesDataclass,
+        output=pth.Path(tmp.name),
+        target_python_version=PythonVersion.PY_313,
+    )
+    opts.update(kwargs)
+
+    # Ensure correct types. codegen lib is unable to handle strings
+    typemap = get_type_hints(datamodel_codegen)
+    for k in opts:
+        try:
+            cls = typemap[k]
+            opts[k] = cls(opts[k])
+        except Exception:
+            pass
+    
     try:
-        datamodel_codegen(
-            schema_file,
-            input_file_type=InputFileType.JsonSchema,
-            output_model_type=DataModelType.DataclassesDataclass,
-            output=pth.Path(tmp.name),
-            custom_file_header=' ',
-            target_python_version=PythonVersion.PY_313,
-            **kwargs
-        )
+        datamodel_codegen(schema_file, custom_file_header=' ', **opts)
 
         ret = open(tmp.name).read()
     except Exception as exc:
