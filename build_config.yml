@@ -18,7 +18,7 @@ freedb_dir: deps/free-exercise-db
 freedb_exc_json: data.json
 
 # Model generation logic
-freedb_model:
+freedb_model_gen:
   # Relative path (from freedb_dir) to JSON schema
   # Used to generate models
   schema_file: "{env.freedb_dir}/schema.json"

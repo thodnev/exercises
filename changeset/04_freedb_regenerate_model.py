@@ -10,7 +10,7 @@ def build(env, log):
     log = logging.getLogger('genmodel')
     log.parent = __log
 
-    cfg = env.freedb_model
+    cfg = env.freedb_model_gen
     regen = SchemaModel(schema_file=cfg.schema_file, model_file=cfg.model_file)
 
     is_regen = regen.regenerate(renew_checked_at=cfg.renew_checked_at,

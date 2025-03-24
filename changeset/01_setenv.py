@@ -13,8 +13,8 @@ def build(env, log):
     env.freedb_dir = pth.Path(env.freedb_dir)
     env.exc_dir = env.builddir.joinpath(env.exc_dir)
 
-    # reformat freedb_model
-    mdl = SimpleNamespace(env.freedb_model)
+    # reformat freedb_model generation
+    mdl = SimpleNamespace(env.freedb_model_gen)
     mdl.schema_file = pth.Path(mdl.schema_file.format(env=env))
     mdl.model_file = pth.Path(mdl.model_file)
-    env.freedb_model = mdl
+    env.freedb_model_gen = mdl
